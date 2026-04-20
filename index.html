@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOFOCA — A household robot, governed by enterprise AI · ThinkNEO</title>
+<meta name="description" content="FOFOCA is a domestic autonomous robot built on commodity hardware and governed by the ThinkNEO AI Control Plane. A research vehicle in public development.">
+<meta name="author" content="Fabio Bastos, ThinkNEO AI Technology">
+<meta property="og:title" content="FOFOCA — A household robot, governed by enterprise AI">
+<meta property="og:description" content="A domestic autonomous robot, built in the open, governed by the ThinkNEO AI Control Plane.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #0c0a09;
+    --ink-2: #15110f;
+    --ink-3: #1f1916;
+    --paper: #faf9f6;
+    --paper-dim: #d6d0c4;
+    --paper-quiet: #8a8378;
+    --rule: #2a241f;
+    --coral: #e94560;
+    --coral-dim: #c9394f;
+    --olive: #8f9d6e;
+    --display: 'Instrument Serif', 'Palatino Linotype', Palatino, serif;
+    --body: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--body);
+    font-weight: 300;
+    line-height: 1.6;
+    font-size: 17px;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* grão discreto no body inteiro */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a { color: var(--coral); text-decoration: none; transition: opacity 0.2s; }
+  a:hover { opacity: 0.7; }
+
+  .mono { font-family: var(--mono); font-size: 0.75em; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  /* ─── Top Meta Bar ─── */
+  .meta-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(12, 10, 9, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--paper-quiet);
+  }
+  .meta-bar .brand { color: var(--paper); }
+  .meta-bar .brand em { font-family: var(--display); font-style: italic; color: var(--coral); font-size: 16px; letter-spacing: 0; text-transform: lowercase; font-weight: 400; }
+  .meta-bar nav { display: flex; gap: 28px; }
+  .meta-bar nav a { color: var(--paper-quiet); }
+  .meta-bar nav a:hover { color: var(--paper); opacity: 1; }
+
+  /* ─── Page container ─── */
+  .page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    padding: 180px 0 120px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+
+  .hero-kicker {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-kicker::before {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--coral);
+  }
+
+  .hero h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(80px, 18vw, 260px);
+    line-height: 0.88;
+    letter-spacing: -0.04em;
+    color: var(--paper);
+    margin-bottom: 40px;
+  }
+  .hero h1 em { font-style: italic; color: var(--coral); }
+
+  .hero-deck {
+    max-width: 640px;
+    font-family: var(--display);
+    font-size: clamp(22px, 2.4vw, 30px);
+    line-height: 1.35;
+    color: var(--paper-dim);
+    font-weight: 400;
+    margin-bottom: 48px;
+  }
+
+  .hero-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;
+    padding-top: 48px;
+    border-top: 1px solid var(--rule);
+    max-width: 840px;
+  }
+  .hero-meta dt {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--paper-quiet);
+    margin-bottom: 8px;
+  }
+  .hero-meta dd {
+    font-family: var(--display);
+    font-size: 22px;
+    color: var(--paper);
+    font-weight: 400;
+  }
+
+  /* ─── Section base ─── */
+  section { padding: 120px 0; border-bottom: 1px solid var(--rule); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-label::before {
+    content: attr(data-num);
+    color: var(--paper-quiet);
+    font-size: 10px;
+  }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 72px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--paper);
+    margin-bottom: 48px;
+    max-width: 900px;
+  }
+  h2 em { font-style: italic; color: var(--coral); }
+
+  h3 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.2;
+    color: var(--paper);
+    margin-bottom: 16px;
+  }
+
+  p { margin-bottom: 20px; color: var(--paper-dim); max-width: 68ch; }
+  p strong { color: var(--paper); font-weight: 500; }
+
+  /* ─── What Section ─── */
+  .what-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .what-grid .lede p {
+    font-family: var(--display);
+    font-size: 24px;
+    line-height: 1.45;
+    color: var(--paper);
+    max-width: none;
+  }
+  .what-grid .lede p + p { font-size: 17px; font-family: var(--body); color: var(--paper-dim); margin-top: 24px; }
+
+  .questions {
+    list-style: none;
+    counter-reset: q;
+  }
+  .questions li {
+    counter-increment: q;
+    padding: 24px 0;
+    border-top: 1px solid var(--rule);
+    font-family: var(--display);
+    font-size: 21px;
+    line-height: 1.4;
+    color: var(--paper);
+    position: relative;
+    padding-left: 48px;
+  }
+  .questions li::before {
+    content: counter(q, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 28px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--coral);
+    letter-spacing: 0.1em;
+  }
+  .questions li:last-child { border-bottom: 1px solid var(--rule); }
+
+  /* ─── Currently banner ─── */
+  .currently {
+    background: var(--ink-2);
+    border: 1px solid var(--rule);
+    padding: 56px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .currently::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--coral);
+  }
+  .currently .stamp {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 16px;
+  }
+  .currently h3 {
+    font-size: 36px;
+    max-width: 700px;
+    margin-bottom: 32px;
+  }
+  .status-list { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 48px; }
+  .status-list div { display: flex; gap: 12px; font-size: 15px; color: var(--paper-dim); align-items: start; line-height: 1.5; }
+  .status-list .m { font-family: var(--mono); font-size: 12px; color: var(--paper-quiet); text-transform: uppercase; letter-spacing: 0.1em; min-width: 90px; padding-top: 3px; }
+  .status-list .t-ok { color: var(--olive); }
+  .status-list .t-wait { color: var(--coral); }
+  .status-list .t-next { color: var(--paper-quiet); }
+
+  /* ─── Dispatch (photo gallery) ─── */
+  .dispatch-lead {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 48px;
+    align-items: end;
+    margin-bottom: 48px;
+  }
+  .dispatch-lead .fig-lead {
+    margin: 0;
+    position: relative;
+  }
+  .dispatch-lead .fig-lead img {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--rule);
+    filter: contrast(1.02) saturate(0.92);
+  }
+  .fig-lead figcaption, .fig-small figcaption {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--paper-quiet);
+    margin-top: 12px;
+    line-height: 1.5;
+    display: block;
+  }
+  .fig-lead figcaption .stamp, .fig-small figcaption .stamp {
+    color: var(--coral);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-right: 10px;
+  }
+  .fig-lead figcaption .body, .fig-small figcaption .body {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--paper-dim);
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1.4;
+    display: block;
+    margin-top: 6px;
+  }
+
+  .dispatch-notes {
+    padding-bottom: 24px;
+  }
+  .dispatch-notes p {
+    font-family: var(--display);
+    font-size: 22px;
+    line-height: 1.45;
+    color: var(--paper);
+    max-width: none;
+    margin-bottom: 0;
+  }
+
+  .dispatch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 16px;
+  }
+  .fig-small { margin: 0; }
+  .fig-small img {
+    width: 100%;
+    display: block;
+    border: 1px solid var(--rule);
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    object-position: center;
+    filter: contrast(1.02) saturate(0.92);
+  }
+
+  /* ─── Architecture diagram ─── */
+  .arch {
+    margin-top: 48px;
+    background: var(--ink-2);
+    border: 1px solid var(--rule);
+    padding: 48px;
+  }
+  .arch svg { display: block; width: 100%; max-width: 980px; margin: 0 auto; height: auto; }
+
+  /* ─── Phases timeline ─── */
+  .phases {
+    margin-top: 32px;
+    position: relative;
+  }
+  .phases::before {
+    content: '';
+    position: absolute;
+    left: 42px;
+    top: 28px;
+    bottom: 28px;
+    width: 1px;
+    background: var(--rule);
+  }
+  .phase {
+    display: grid;
+    grid-template-columns: 90px 1fr 2fr;
+    gap: 40px;
+    align-items: baseline;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+    transition: background 0.2s;
+  }
+  .phase::before {
+    content: '';
+    position: absolute;
+    left: 38px;
+    top: 38px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ink);
+    border: 1px solid var(--rule);
+    z-index: 1;
+  }
+  .phase.p-active::before { background: var(--coral); border-color: var(--coral); box-shadow: 0 0 0 6px rgba(233, 69, 96, 0.15); }
+  .phase.p-done::before { background: var(--paper-quiet); border-color: var(--paper-quiet); }
+  .phase.p-active { background: rgba(233, 69, 96, 0.04); }
+  .phase-num {
+    font-family: var(--display);
+    font-size: 38px;
+    color: var(--paper-quiet);
+    font-weight: 400;
+    font-style: italic;
+    padding-left: 8px;
+  }
+  .phase.p-active .phase-num { color: var(--coral); }
+  .phase.p-done .phase-num { color: var(--paper); opacity: 0.4; }
+  .phase-name {
+    font-family: var(--display);
+    font-size: 24px;
+    color: var(--paper);
+    line-height: 1.2;
+  }
+  .phase.p-done .phase-name { text-decoration: line-through; text-decoration-thickness: 1px; color: var(--paper-quiet); }
+  .phase-output {
+    font-size: 14px;
+    color: var(--paper-dim);
+    line-height: 1.5;
+  }
+  .phase-output::before {
+    content: 'outputs — ';
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--paper-quiet);
+  }
+
+  /* ─── Stack columns ─── */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+    margin-top: 32px;
+  }
+  .stack-col h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stack-col ul { list-style: none; }
+  .stack-col li {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 14px;
+  }
+  .stack-col li:last-child { border-bottom: none; }
+  .stack-col .k { color: var(--paper); font-weight: 400; }
+  .stack-col .v { color: var(--paper-quiet); font-family: var(--mono); font-size: 11px; text-align: right; text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* ─── Partners ─── */
+  .partners {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 32px;
+  }
+  .partner {
+    border: 1px solid var(--rule);
+    padding: 32px 28px;
+    background: var(--ink-2);
+    transition: border-color 0.3s;
+  }
+  .partner:hover { border-color: var(--coral); }
+  .partner .role {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--paper-quiet);
+    margin-bottom: 16px;
+  }
+  .partner .name {
+    font-family: var(--display);
+    font-size: 28px;
+    color: var(--paper);
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+  .partner .detail { font-size: 14px; color: var(--paper-dim); line-height: 1.5; }
+
+  /* ─── Footer ─── */
+  footer {
+    padding: 80px 0 48px;
+    border-top: 1px solid var(--rule);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 80px;
+  }
+  .footer-brand em {
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--coral);
+    font-size: 36px;
+  }
+  .footer-brand p {
+    font-family: var(--display);
+    font-size: 20px;
+    color: var(--paper-dim);
+    line-height: 1.4;
+    margin-top: 16px;
+    max-width: 460px;
+  }
+  .footer-col h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 20px;
+  }
+  .footer-col a {
+    display: block;
+    color: var(--paper-dim);
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .footer-col a:hover { color: var(--paper); }
+
+  .colophon {
+    padding-top: 32px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--paper-quiet);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* ─── Entrance animations (staggered) ─── */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero > * { opacity: 0; animation: rise 0.8s ease-out forwards; }
+  .hero .hero-kicker { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.25s; }
+  .hero .hero-deck { animation-delay: 0.55s; }
+  .hero .hero-meta { animation-delay: 0.75s; }
+
+  /* ─── Mobile ─── */
+  @media (max-width: 780px) {
+    .meta-bar { padding: 12px 20px; font-size: 10px; }
+    .meta-bar nav { display: none; }
+    .page { padding: 0 20px; }
+    .hero { padding: 140px 0 80px; }
+    .hero-meta { grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 32px; }
+    section { padding: 80px 0; }
+    h2 { margin-bottom: 32px; }
+    .what-grid { grid-template-columns: 1fr; gap: 48px; }
+    .status-list { grid-template-columns: 1fr; }
+    .currently { padding: 32px 24px; }
+    .arch { padding: 24px 16px; }
+    .phase { grid-template-columns: 60px 1fr; gap: 16px; }
+    .phase-output { grid-column: 2; padding-top: 8px; font-size: 13px; }
+    .phases::before { left: 28px; }
+    .phase::before { left: 24px; top: 34px; }
+    .stack-grid { grid-template-columns: 1fr; gap: 32px; }
+    .partners { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+    .colophon { flex-direction: column; align-items: flex-start; }
+    .dispatch-lead { grid-template-columns: 1fr; gap: 24px; }
+    .dispatch-grid { grid-template-columns: 1fr; gap: 24px; }
+    .dispatch-notes p { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── META BAR ─── -->
+<div class="meta-bar">
+  <div class="brand">ThinkNEO / <em>FOFOCA</em></div>
+  <nav>
+    <a href="#overview">What</a>
+    <a href="#status">Status</a>
+    <a href="#dispatch">Bench</a>
+    <a href="#architecture">Build</a>
+    <a href="#phases">Roadmap</a>
+    <a href="#partners">Partners</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</div>
+
+<div class="page">
+
+<!-- ─── HERO ─── -->
+<header class="hero" id="overview">
+  <div class="hero-kicker">
+    A ThinkNEO research project · Bangkok · 2026 · Vol. 01
+  </div>
+  <h1>Fofoca<em>.</em></h1>
+  <div class="hero-deck">
+    A domestic autonomous robot, built on commodity hardware and governed —
+    every action, every decision, every pixel — by the <em>ThinkNEO AI
+    Control Plane</em>.
+  </div>
+  <dl class="hero-meta">
+    <div><dt>Status</dt><dd>Phase 1 / 13</dd></div>
+    <div><dt>Method</dt><dd>Open development</dd></div>
+    <div><dt>Scope</dt><dd>Single household</dd></div>
+    <div><dt>Team</dt><dd>One, nightly</dd></div>
+  </dl>
+</header>
+
+<!-- ─── WHAT ─── -->
+<section id="what">
+  <div class="section-label" data-num="§ 01">About the project</div>
+  <h2>Not a product. A <em>research vehicle</em>.</h2>
+  <div class="what-grid">
+    <div class="lede">
+      <p>
+        <em>Fofoca</em> is Portuguese for friendly gossip — talk that observes,
+        connects, and occasionally makes trouble. The robot shares the name
+        on purpose. It is designed to watch, learn, and quietly report on the
+        rhythms of a household — never to surveil.
+      </p>
+      <p>
+        Every robot that exists in 2026 is either a consumer puck with fixed
+        behavior or a six-figure research platform. FOFOCA is a deliberate
+        third path: a fully capable household robot built from off-the-shelf
+        parts, developed in the open, governed end-to-end by enterprise-grade
+        AI infrastructure. If the ThinkNEO Control Plane can govern <em>this</em>,
+        governing a CRM is trivial.
+      </p>
+    </div>
+    <div>
+      <ol class="questions">
+        <li>Can a solo founder build a credible autonomous robot using only commodity hardware and open-source software in 2026?</li>
+        <li>Can enterprise AI governance patterns apply meaningfully to a physical agent in a private home?</li>
+        <li>Can the resulting platform become a reference implementation for enterprise buyers evaluating the ThinkNEO Control Plane?</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CURRENTLY ─── -->
+<section id="status">
+  <div class="section-label" data-num="§ 02">Current state</div>
+  <h2>What <em>today</em> looks like.</h2>
+  <div class="currently">
+    <div class="stamp">Phase 1 / 13 · Mechanical base · Updated April 21, 2026</div>
+    <h3>Hardware acquired. Mainboard identified. Manufacturer contacted. Firmware port blocked on two shipments.</h3>
+    <div class="status-list">
+      <div><span class="m t-ok">Done</span>Hoverboard disassembled, Puya PY32F031 mainboard identified and documented</div>
+      <div><span class="m t-ok">Done</span>Silkscreen pinout extracted — UART, Hall sensors, SWD header all mapped</div>
+      <div><span class="m t-ok">Done</span>Formal outreach sent to Pinshang Electronics (品尚电子) for datasheet + schematic</div>
+      <div><span class="m t-wait">Waiting</span>ST-Link V2 programmer shipping from Lazada TH</div>
+      <div><span class="m t-wait">Waiting</span>Manufacturer reply — expected within 3–7 days via our Guangzhou contact</div>
+      <div><span class="m t-next">Next</span>Original firmware backup via SWD, then port begins</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DISPATCH FROM THE BENCH ─── -->
+<section id="dispatch">
+  <div class="section-label" data-num="§ 03">Dispatch from the bench</div>
+  <h2>The part number that <em>nobody</em> supports.</h2>
+
+  <div class="dispatch-lead">
+    <figure class="fig-lead">
+      <img src="images/bench-01-disassembly.jpg" alt="The hoverboard opened on a workbench in Bangkok, April 21 2026">
+      <figcaption>
+        <span class="stamp">21 APR · 01:04 BKK</span>
+        <span class="body">
+          The whole thing, opened for the first time. Two mainboards, one per
+          motor — not a single mainboard plus sideboards as most published
+          firmware-hack projects assume.
+        </span>
+      </figcaption>
+    </figure>
+    <div class="dispatch-notes">
+      <p>
+        This is what hardware looks like when you do not yet know what is
+        inside it. The answer, we would find out over the next ninety
+        minutes, is a chip that no public firmware project has ever
+        targeted.
+      </p>
+    </div>
+  </div>
+
+  <div class="dispatch-grid">
+    <figure class="fig-small">
+      <img src="images/bench-02-mainboard-front.jpg" alt="One of the twin mainboards, isolated and photographed from the front">
+      <figcaption>
+        <span class="stamp">§ Board</span>
+        <span class="body">
+          One of the twin boards, isolated. Silkscreen reads <em>CSC1.37 主板</em>
+          — "mainboard" in Chinese — dated December 2025. The 48-pin square at center is the brain.
+        </span>
+      </figcaption>
+    </figure>
+    <figure class="fig-small">
+      <img src="images/bench-03-chip-py32f031.jpg" alt="Close-up of the Puya PY32F031 microcontroller">
+      <figcaption>
+        <span class="stamp">§ MCU</span>
+        <span class="body">
+          Close. Laser-etched on the die: <em>PY32F031</em>. Puya Semiconductor,
+          Shenzhen. Cortex-M0+ at 48 MHz. The part number that no public
+          firmware project yet supports.
+        </span>
+      </figcaption>
+    </figure>
+    <figure class="fig-small">
+      <img src="images/bench-04-silkscreen-labels.jpg" alt="Reverse side of the board showing silkscreen test-point labels">
+      <figcaption>
+        <span class="stamp">§ Gift</span>
+        <span class="body">
+          Reverse side. Test points labeled in plain text: <em>Rx, Tx, Ha, Hb,
+          Hc, 3.3v, Temp</em>. A documentation gift from an OEM that did not
+          have to be this kind.
+        </span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ─── ARCHITECTURE ─── -->
+<section id="architecture">
+  <div class="section-label" data-num="§ 04">How it is built</div>
+  <h2>Three tiers. <em>One</em> control plane.</h2>
+  <p>
+    FOFOCA runs on a deliberately unremarkable hardware stack — a hoverboard
+    chassis, a Raspberry Pi 5, and a decade-old Dell rack server. What makes
+    the system interesting is not the machinery. It is that every tool call,
+    every model invocation, every data write across all three tiers is
+    inspected, logged, and — where appropriate — blocked or rate-limited by
+    the ThinkNEO Control Plane. The same platform that governs enterprise
+    deployments, governing a physical agent in someone's living room.
+  </p>
+
+  <div class="arch">
+    <svg viewBox="0 0 980 560" xmlns="http://www.w3.org/2000/svg" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <defs>
+        <style>
+          .tier { fill: #15110f; stroke: #2a241f; stroke-width: 1; }
+          .tier-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 2px; fill: #8a8378; text-transform: uppercase; }
+          .title { font-family: 'Instrument Serif', serif; font-size: 22px; fill: #faf9f6; }
+          .subt { font-family: 'IBM Plex Sans', sans-serif; font-size: 12px; fill: #d6d0c4; }
+          .smalt { font-family: 'IBM Plex Sans', sans-serif; font-size: 11px; fill: #8a8378; }
+          .accent-line { stroke: #e94560; stroke-width: 1.5; }
+          .dim-line { stroke: #2a241f; stroke-width: 1; stroke-dasharray: 3 3; }
+          .dot { fill: #e94560; }
+        </style>
+      </defs>
+
+      <!-- Top tier: control plane banner -->
+      <rect x="60" y="30" width="860" height="70" class="tier" stroke="#e94560"/>
+      <text x="80" y="55" class="tier-label">Layer 00 · Governance</text>
+      <text x="80" y="82" class="title">ThinkNEO AI Control Plane</text>
+      <text x="520" y="72" class="smalt">audit · observability · cost · safety · routing</text>
+
+      <!-- connection lines -->
+      <line x1="300" y1="100" x2="300" y2="180" class="accent-line"/>
+      <line x1="680" y1="100" x2="680" y2="180" class="accent-line"/>
+
+      <!-- Left: Cognition (R210) -->
+      <rect x="60" y="180" width="420" height="220" class="tier"/>
+      <text x="80" y="205" class="tier-label">Layer 01 · Cognition</text>
+      <text x="80" y="232" class="title">Dell PowerEdge R210</text>
+      <text x="80" y="252" class="smalt">Ubuntu 24.04 · Docker Compose · ZFS</text>
+
+      <text x="80" y="290" class="subt">ChromaDB · PostgreSQL · MinIO</text>
+      <text x="80" y="312" class="subt">Mosquitto MQTT · FastAPI · Grafana</text>
+      <text x="80" y="334" class="subt">NVIDIA NIM → Nemotron models</text>
+      <text x="80" y="376" class="smalt">persistent memory · frontier inference · observability</text>
+
+      <!-- Right: Edge (Pi 5) -->
+      <rect x="500" y="180" width="420" height="220" class="tier"/>
+      <text x="520" y="205" class="tier-label">Layer 02 · Edge</text>
+      <text x="520" y="232" class="title">Raspberry Pi 5 · 8 GB</text>
+      <text x="520" y="252" class="smalt">Ubuntu 24.04 · ROS 2 Jazzy</text>
+
+      <text x="520" y="290" class="subt">Sensor drivers · local CV inference</text>
+      <text x="520" y="312" class="subt">Motion control · safety interlocks</text>
+      <text x="520" y="334" class="subt">E-stop · collision · over-current</text>
+      <text x="520" y="376" class="smalt">network-independent safety · low-latency response</text>
+
+      <!-- MQTT bridge -->
+      <line x1="480" y1="290" x2="500" y2="290" class="accent-line"/>
+      <circle cx="490" cy="290" r="3" class="dot"/>
+
+      <!-- connection down to mechanical -->
+      <line x1="710" y1="400" x2="710" y2="440" class="accent-line"/>
+
+      <!-- Mechanical tier -->
+      <rect x="60" y="440" width="860" height="100" class="tier"/>
+      <text x="80" y="465" class="tier-label">Layer 03 · Mechanical</text>
+      <text x="80" y="492" class="title">Hoverboard chassis · 6-DoF arm · camera mast</text>
+      <text x="80" y="518" class="smalt">2 × BLDC motors (250 W) · 36 V 10S2P battery · Puya PY32F031 MCU · Insta360 · 6× servos · BT audio</text>
+
+      <!-- vertical accent line marking "one governance layer over all" -->
+      <line x1="30" y1="30" x2="30" y2="540" class="accent-line"/>
+      <circle cx="30" cy="65" r="3" class="dot"/>
+      <circle cx="30" cy="290" r="3" class="dot"/>
+      <circle cx="30" cy="490" r="3" class="dot"/>
+    </svg>
+  </div>
+
+  <!-- stack grid -->
+  <div class="stack-grid">
+    <div class="stack-col">
+      <h3>Mechanical</h3>
+      <ul>
+        <li><span class="k">Chassis</span><span class="v">6.5" hoverboard</span></li>
+        <li><span class="k">Motors</span><span class="v">2× 250 W BLDC</span></li>
+        <li><span class="k">MCU</span><span class="v">Puya PY32F031</span></li>
+        <li><span class="k">Battery</span><span class="v">36 V / 10S2P</span></li>
+        <li><span class="k">Arm</span><span class="v">6-DoF servos</span></li>
+        <li><span class="k">Vision</span><span class="v">Insta360</span></li>
+      </ul>
+    </div>
+    <div class="stack-col">
+      <h3>Edge (Pi 5)</h3>
+      <ul>
+        <li><span class="k">OS</span><span class="v">Ubuntu 24.04</span></li>
+        <li><span class="k">Middleware</span><span class="v">ROS 2 Jazzy</span></li>
+        <li><span class="k">Perception</span><span class="v">OpenCV + tflite</span></li>
+        <li><span class="k">Motion</span><span class="v">fofoca-motion</span></li>
+        <li><span class="k">Bus</span><span class="v">MQTT (mosquitto)</span></li>
+        <li><span class="k">Safety</span><span class="v">local-first</span></li>
+      </ul>
+    </div>
+    <div class="stack-col">
+      <h3>Server (R210)</h3>
+      <ul>
+        <li><span class="k">Vector memory</span><span class="v">ChromaDB</span></li>
+        <li><span class="k">Relational</span><span class="v">PostgreSQL</span></li>
+        <li><span class="k">Object storage</span><span class="v">MinIO</span></li>
+        <li><span class="k">APIs</span><span class="v">FastAPI</span></li>
+        <li><span class="k">Dashboards</span><span class="v">Grafana</span></li>
+        <li><span class="k">Frontier LLM</span><span class="v">NVIDIA NIM</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PHASES ─── -->
+<section id="phases">
+  <div class="section-label" data-num="§ 05">Roadmap</div>
+  <h2>Thirteen phases. Each <em>one</em> demonstrable.</h2>
+  <p>
+    No phase is "research." If it cannot be demonstrated — on real hardware,
+    in a real home, with a real person watching — it is not done. Dates are
+    not published. When a phase lands, it lands in the commit log.
+  </p>
+
+  <div class="phases">
+    <div class="phase p-active">
+      <div class="phase-num">01</div>
+      <div class="phase-name">Mechanical base</div>
+      <div class="phase-output">Hoverboard drives via UART command from a laptop</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">02</div>
+      <div class="phase-name">Server stack</div>
+      <div class="phase-output"><code>docker compose up</code> brings all services; Grafana shows heartbeats</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">03</div>
+      <div class="phase-name">Edge bringup</div>
+      <div class="phase-output">Pi 5 publishes sensor telemetry to the MQTT bus</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">04</div>
+      <div class="phase-name">Motion protocol</div>
+      <div class="phase-output">Pi 5 commands motors; closed-loop odometry via Hall sensors</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">05</div>
+      <div class="phase-name">Teleop</div>
+      <div class="phase-output">Phone or browser can drive FOFOCA around a room</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">06</div>
+      <div class="phase-name">Dead reckoning</div>
+      <div class="phase-output">FOFOCA reports its position and heading continuously</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">07</div>
+      <div class="phase-name">Visual SLAM</div>
+      <div class="phase-output">Live floor plan updates as FOFOCA roams</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">08</div>
+      <div class="phase-name">Autonomous navigation</div>
+      <div class="phase-output">"Go to the kitchen" executes without human input</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">09</div>
+      <div class="phase-name">Perception</div>
+      <div class="phase-output">Person, dog, and object detection at usable frame rates</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">10</div>
+      <div class="phase-name">Face recognition</div>
+      <div class="phase-output">Household members recognized with local, opt-in enrollment</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">11</div>
+      <div class="phase-name">Dog monitoring</div>
+      <div class="phase-output">Daily dog-activity report generated and delivered</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">12</div>
+      <div class="phase-name">Routine learning</div>
+      <div class="phase-output">FOFOCA adapts its own schedule to household patterns</div>
+    </div>
+    <div class="phase">
+      <div class="phase-num">13</div>
+      <div class="phase-name">Emergency response</div>
+      <div class="phase-output">Validated end-to-end fall-detection → emergency call flow</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PARTNERS ─── -->
+<section id="partners">
+  <div class="section-label" data-num="§ 06">Who backs this</div>
+  <h2>Three partnerships, <em>three</em> layers.</h2>
+  <p>
+    FOFOCA is a ThinkNEO project. ThinkNEO operates with three active
+    institutional partnerships — one at each layer of the stack: hardware,
+    frontier model, and academic research. This is not yet common for a
+    company of our size.
+  </p>
+
+  <div class="partners">
+    <div class="partner">
+      <div class="role">Hardware · Inference</div>
+      <div class="name">NVIDIA Inception</div>
+      <div class="detail">Accepted partner program — hardware, NIM inference, and the broader startup ecosystem. Nemotron models power FOFOCA's higher-order cognition.</div>
+    </div>
+    <div class="partner">
+      <div class="role">Frontier Model</div>
+      <div class="name">Anthropic Partner Network</div>
+      <div class="detail">Claude is a first-class model in the ThinkNEO Control Plane. Partnership covers joint customer enablement and integration patterns.</div>
+    </div>
+    <div class="partner">
+      <div class="role">Academic Research</div>
+      <div class="name">USP · ICMC</div>
+      <div class="detail">Active collaboration with the Agents4Gov research group at Universidade de São Paulo on AI governance methodology and evaluation.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer id="contact">
+  <div class="page">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <em>fofoca.</em>
+        <p>A household robot, governed. Developed in the open by one person, in Bangkok, between 10 p.m. and 5 a.m., with a partner lab in São Paulo and a manufacturer dialogue in Shenzhen.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:fabio@thinkneo.ai">fabio@thinkneo.ai</a>
+        <a href="https://thinkneo.ai">thinkneo.ai</a>
+        <a href="https://thinkneo.ai/book">AI Governance: A Field Guide</a>
+      </div>
+      <div class="footer-col">
+        <h4>Follow</h4>
+        <a href="https://github.com/thinkneo-ai/fofoca-firmware">GitHub</a>
+        <a href="https://twitter.com/thinkneo_ai">@thinkneo_ai</a>
+        <a href="https://linkedin.com/company/thinkneo">LinkedIn</a>
+      </div>
+    </div>
+    <div class="colophon">
+      <div>ThinkNEO AI Technology Company Limited · Hong Kong</div>
+      <div>Code MIT · Docs CC BY 4.0 · Set in Instrument Serif &amp; IBM Plex</div>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+</body>
+</html>
